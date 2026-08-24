@@ -57,7 +57,7 @@
       const yes=document.getElementById('yes');
       const no=document.getElementById('no');
       let lastConfirmed=readSavedTime();
-      let previousElapsed='UNCONFIRMED';
+      let previousConfirmedAt=lastConfirmed || 0;
       let promptTimer=null;
 
       function readSavedTime(){ const raw=localStorage.getItem(STORAGE_KEY); if(!raw)return null; const value=Number(raw); return Number.isFinite(value)&&value>0?value:null; }
@@ -73,7 +73,7 @@
       function render(){ elapsed.textContent=formatElapsed(lastConfirmed); }
       function closeAlive(){ clearTimeout(promptTimer); aliveScreen.classList.remove('show'); sharePrompt.classList.remove('show'); aliveWord.style.display='block'; aliveScreen.setAttribute('aria-hidden','true'); }
       function confirmAlive(){
-        previousElapsed=formatElapsed(lastConfirmed);
+        previousConfirmedAt=lastConfirmed || 0;
         lastConfirmed=Date.now(); localStorage.setItem(STORAGE_KEY,String(lastConfirmed)); render();
         if(navigator.vibrate) navigator.vibrate(45);
         aliveScreen.classList.add('show'); aliveScreen.setAttribute('aria-hidden','false'); aliveWord.style.display='block'; sharePrompt.classList.remove('show');
@@ -81,7 +81,7 @@
         promptTimer=setTimeout(()=>{ aliveWord.style.display='none'; sharePrompt.classList.add('show'); },1400);
       }
       function share(){
-        if(window.StillAliveAndroid && typeof window.StillAliveAndroid.shareAlive==='function') window.StillAliveAndroid.shareAlive(previousElapsed);
+        if(window.StillAliveAndroid && typeof window.StillAliveAndroid.shareAlive==='function') window.StillAliveAndroid.shareAlive(previousConfirmedAt);
         closeAlive();
       }
       button.addEventListener('click',confirmAlive);
