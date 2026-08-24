@@ -51,11 +51,12 @@ class MainActivity : Activity() {
                     imageFile
                 )
 
-                val caption = if (previousElapsed.isBlank() || previousElapsed == "UNCONFIRMED") {
+                val confirmation = if (previousElapsed.isBlank() || previousElapsed == "UNCONFIRMED") {
                     "For the first time, I have confirmed that I am still alive."
                 } else {
                     "After $previousElapsed, I have confirmed that I am still alive."
                 }
+                val caption = "$confirmation\n\nConfirm your continued existence with the STILL ALIVE app. Are you still alive? Find out now with this new app!"
 
                 val intent = Intent(Intent.ACTION_SEND).apply {
                     type = "image/png"
