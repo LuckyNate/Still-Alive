@@ -51,13 +51,10 @@ class MainActivity : Activity() {
                     imageFile
                 )
 
-                val caption = buildString {
-                    append("I just confirmed that I am still alive with Still Alive.")
-                    if (previousElapsed.isNotBlank() && previousElapsed != "UNCONFIRMED") {
-                        append(" It had been ")
-                        append(previousElapsed)
-                        append(" since my last confirmation.")
-                    }
+                val caption = if (previousElapsed.isBlank() || previousElapsed == "UNCONFIRMED") {
+                    "For the first time, I have confirmed that I am still alive."
+                } else {
+                    "After $previousElapsed, I have confirmed that I am still alive."
                 }
 
                 val intent = Intent(Intent.ACTION_SEND).apply {
