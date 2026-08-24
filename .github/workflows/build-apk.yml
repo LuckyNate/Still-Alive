@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -33,10 +33,23 @@ jobs:
       - name: Rename APK
         run: cp app/build/outputs/apk/debug/app-debug.apk Still-Alive-latest.apk
 
-      - name: Upload APK
+      - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: Still-Alive-latest
           path: Still-Alive-latest.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Create latest release if needed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view latest >/dev/null 2>&1; then
+            gh release create latest --title "Still Alive — Latest Build" --notes "Automatically updated APK from main."
+          fi
+
+      - name: Replace latest APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload latest Still-Alive-latest.apk --clobber
