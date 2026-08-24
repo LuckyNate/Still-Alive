@@ -2,6 +2,8 @@ plugins {
     id("com.android.application")
 }
 
+val ciBuildNumber = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull()
+
 android {
     namespace = "com.prankdom.stillalive"
     compileSdk = 36
@@ -10,8 +12,8 @@ android {
         applicationId = "com.prankdom.stillalive"
         minSdk = 33
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.3.0"
+        versionCode = ciBuildNumber ?: 3
+        versionName = if (ciBuildNumber != null) "0.3.$ciBuildNumber" else "0.3.0"
     }
 }
 
