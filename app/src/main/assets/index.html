@@ -41,7 +41,7 @@
   <div id="aliveScreen" aria-hidden="true">
     <div id="aliveWord">ALIVE</div>
     <div id="sharePrompt">
-      <p>Do you want to let your friends know you are still alive?</p>
+      <p>Do you want to share the good news?</p>
       <div class="choices"><button id="yes" type="button">YES</button><button id="no" type="button">NO</button></div>
     </div>
   </div>
@@ -57,20 +57,23 @@
       const yes=document.getElementById('yes');
       const no=document.getElementById('no');
       let lastConfirmed=readSavedTime();
+      let previousElapsed='UNCONFIRMED';
       let promptTimer=null;
 
       function readSavedTime(){ const raw=localStorage.getItem(STORAGE_KEY); if(!raw)return null; const value=Number(raw); return Number.isFinite(value)&&value>0?value:null; }
       function plural(value,word){ return `${value} ${word}${value===1?'':'s'}`; }
-      function render(){
-        if(lastConfirmed===null){ elapsed.textContent='UNCONFIRMED'; return; }
-        let seconds=Math.max(0,Math.floor((Date.now()-lastConfirmed)/1000));
+      function formatElapsed(fromTime){
+        if(fromTime===null) return 'UNCONFIRMED';
+        let seconds=Math.max(0,Math.floor((Date.now()-fromTime)/1000));
         const days=Math.floor(seconds/86400); seconds%=86400;
         const hours=Math.floor(seconds/3600); seconds%=3600;
         const minutes=Math.floor(seconds/60); seconds%=60;
-        elapsed.textContent=[plural(days,'day'),plural(hours,'hour'),plural(minutes,'minute'),plural(seconds,'second')].join(' ');
+        return [plural(days,'day'),plural(hours,'hour'),plural(minutes,'minute'),plural(seconds,'second')].join(' ');
       }
+      function render(){ elapsed.textContent=formatElapsed(lastConfirmed); }
       function closeAlive(){ clearTimeout(promptTimer); aliveScreen.classList.remove('show'); sharePrompt.classList.remove('show'); aliveWord.style.display='block'; aliveScreen.setAttribute('aria-hidden','true'); }
       function confirmAlive(){
+        previousElapsed=formatElapsed(lastConfirmed);
         lastConfirmed=Date.now(); localStorage.setItem(STORAGE_KEY,String(lastConfirmed)); render();
         if(navigator.vibrate) navigator.vibrate(45);
         aliveScreen.classList.add('show'); aliveScreen.setAttribute('aria-hidden','false'); aliveWord.style.display='block'; sharePrompt.classList.remove('show');
@@ -78,8 +81,8 @@
         promptTimer=setTimeout(()=>{ aliveWord.style.display='none'; sharePrompt.classList.add('show'); },1400);
       }
       function share(){
-        if(window.StillAliveAndroid && typeof window.StillAliveAndroid.shareAlive==='function') window.StillAliveAndroid.shareAlive();
-        else if(navigator.share) navigator.share({text:'I have confirmed that I am still alive.'}).catch(()=>{});
+        if(window.StillAliveAndroid && typeof window.StillAliveAndroid.shareAlive==='function') window.StillAliveAndroid.shareAlive(previousElapsed);
+        else if(navigator.share) navigator.share({text:'I just confirmed that I am still alive with Still Alive.'}).catch(()=>{});
         closeAlive();
       }
       button.addEventListener('click',confirmAlive);
