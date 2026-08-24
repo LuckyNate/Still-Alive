@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <title>Still Alive</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #000;
+      color: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      min-height: 100dvh;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    main {
+      width: min(100%, 720px);
+      min-height: 100dvh;
+      padding: max(28px, env(safe-area-inset-top)) 24px max(28px, env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      align-items: center;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.25rem, 9vw, 4.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      font-weight: 900;
+    }
+
+    #confirm {
+      justify-self: center;
+      width: min(72vw, 360px);
+      aspect-ratio: 1;
+      border: 5px solid #fff;
+      border-radius: 50%;
+      background: #fff;
+      color: #000;
+      font: inherit;
+      font-size: clamp(2rem, 9vw, 4rem);
+      line-height: 0.9;
+      letter-spacing: -0.04em;
+      font-weight: 900;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: none;
+      outline: none;
+      transition: transform 60ms linear, background 60ms linear, color 60ms linear;
+    }
+
+    #confirm:active {
+      transform: scale(0.96);
+      background: #000;
+      color: #fff;
+    }
+
+    .history {
+      padding-bottom: 2px;
+      font-size: clamp(0.95rem, 3.7vw, 1.2rem);
+      line-height: 1.35;
+    }
+
+    .history p {
+      margin: 0 0 8px;
+      opacity: 0.7;
+    }
+
+    #elapsed {
+      min-height: 1.5em;
+      font-size: clamp(1.1rem, 4.7vw, 1.55rem);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+
+    #flash {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      background: #fff;
+      color: #000;
+      font-size: clamp(3.5rem, 16vw, 8rem);
+      font-weight: 900;
+      opacity: 0;
+      transition: opacity 90ms linear;
+    }
+
+    #flash.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>STILL ALIVE?</h1>
+
+    <button id="confirm" type="button" aria-label="Confirm that you are still alive">
+      PRESS<br>HERE
+    </button>
+
+    <section class="history" aria-live="polite">
+      <p>Last time you confirmed yourself alive:</p>
+      <div id="elapsed">UNCONFIRMED</div>
+    </section>
+  </main>
+
+  <div id="flash" aria-hidden="true">ALIVE.</div>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = 'stillAlive:lastConfirmed';
+      const button = document.getElementById('confirm');
+      const elapsed = document.getElementById('elapsed');
+      const flash = document.getElementById('flash');
+
+      let lastConfirmed = readSavedTime();
+      let flashTimer = null;
+
+      function readSavedTime() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const value = Number(raw);
+        return Number.isFinite(value) && value > 0 ? value : null;
+      }
+
+      function plural(value, word) {
+        return `${value} ${word}${value === 1 ? '' : 's'}`;
+      }
+
+      function render() {
+        if (lastConfirmed === null) {
+          elapsed.textContent = 'UNCONFIRMED';
+          return;
+        }
+
+        let seconds = Math.max(0, Math.floor((Date.now() - lastConfirmed) / 1000));
+        const days = Math.floor(seconds / 86400);
+        seconds %= 86400;
+        const hours = Math.floor(seconds / 3600);
+        seconds %= 3600;
+        const minutes = Math.floor(seconds / 60);
+        seconds %= 60;
+
+        elapsed.textContent = [
+          plural(days, 'day'),
+          plural(hours, 'hour'),
+          plural(minutes, 'minute'),
+          plural(seconds, 'second')
+        ].join(' ');
+      }
+
+      function confirmAlive() {
+        lastConfirmed = Date.now();
+        localStorage.setItem(STORAGE_KEY, String(lastConfirmed));
+        render();
+
+        if (navigator.vibrate) navigator.vibrate(45);
+
+        flash.classList.add('show');
+        clearTimeout(flashTimer);
+        flashTimer = setTimeout(() => flash.classList.remove('show'), 260);
+      }
+
+      button.addEventListener('click', confirmAlive);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          lastConfirmed = readSavedTime();
+          render();
+        }
+      });
+
+      render();
+      setInterval(render, 250);
+    })();
+  </script>
+</body>
+</html>
