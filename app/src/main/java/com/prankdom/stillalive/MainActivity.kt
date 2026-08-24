@@ -1,6 +1,7 @@
 package com.prankdom.stillalive
 
 import android.app.Activity
+import android.content.ClipData
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -56,15 +57,21 @@ class MainActivity : Activity() {
                 } else {
                     "After $previousElapsed, I have confirmed that I am still alive."
                 }
+
                 val caption = "$confirmation\n\nAre you STILL ALIVE?\nFind out today\nand let your friends know\nwith our STILL ALIVE app!\n100% FREE"
 
-                val intent = Intent(Intent.ACTION_SEND).apply {
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
                     type = "image/png"
                     putExtra(Intent.EXTRA_STREAM, imageUri)
                     putExtra(Intent.EXTRA_TEXT, caption)
+                    clipData = ClipData.newUri(contentResolver, "Still Alive", imageUri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-                startActivity(Intent.createChooser(intent, "Share the good news"))
+
+                val chooser = Intent.createChooser(shareIntent, "Share the good news").apply {
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                startActivity(chooser)
             }
         }
     }
