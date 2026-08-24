@@ -17,4 +17,5 @@ android {
 
 dependencies {
     implementation("androidx.webkit:webkit:1.17.0")
+    implementation("androidx.core:core-ktx:1.17.0")
 }
