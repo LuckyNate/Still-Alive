@@ -56,7 +56,7 @@ class MainActivity : Activity() {
                 } else {
                     "After $previousElapsed, I have confirmed that I am still alive."
                 }
-                val caption = "$confirmation\n\nConfirm your continued existence with the STILL ALIVE app. Are you still alive? Find out now with this new app!"
+                val caption = "$confirmation\n\nAre you STILL ALIVE?\nFind out today\nand let your friends know\nwith our STILL ALIVE app!\n100% FREE"
 
                 val intent = Intent(Intent.ACTION_SEND).apply {
                     type = "image/png"
