@@ -29,8 +29,8 @@ jobs:
         with:
           gradle-version: '9.5.0'
 
-      - name: Build debug APK
-        run: gradle :app:assembleDebug
+      - name: Build clean debug APK
+        run: gradle clean :app:assembleDebug --no-build-cache
 
       - name: Name iterative APK
         run: |
@@ -43,7 +43,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Still-Alive-${{ env.VERSION }}
-          path: Still-Alive-${{ env.VERSION }}.apk
+          path: |
+            Still-Alive-${{ env.VERSION }}.apk
+            Still-Alive-latest.apk
           if-no-files-found: error
           retention-days: 30
 
@@ -56,7 +58,7 @@ jobs:
             gh release create latest --title "Still Alive — Latest Build" --notes "Automatically updated APK from main."
           fi
 
-      - name: Replace latest APK and add versioned APK
+      - name: Replace latest APK and upload versioned APK
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
